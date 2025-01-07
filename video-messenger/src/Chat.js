@@ -24,6 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import VideoChat from './VideoChat';
 import CameraTest from './CameraTest';
 
+
 const socket = io('http://localhost:5000');
 
 const Chat = () => {
