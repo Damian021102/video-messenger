@@ -3,6 +3,7 @@ import { auth, googleProvider, signInWithPopup, createUserWithEmailAndPassword }
 import { Button, Box, Typography, TextField, Link } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
+
 const Registration = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

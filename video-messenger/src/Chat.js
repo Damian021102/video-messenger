@@ -1,33 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Box, Typography, List, ListItem, ListItemText, TextField, Button, Paper, Avatar, IconButton, Menu, MenuItem
+  Box,
+  Typography,
+  List,
+  ListItem,
+  TextField,
+  Button,
+  Paper,
+  Avatar,
+  IconButton,
+  Tooltip,
+  Menu,
+  MenuItem,
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import LogoutIcon from '@mui/icons-material/Logout';
-import MoreVertIcon from '@mui/icons-material/MoreVert'; // Icon for friend actions
-import Tooltip from '@mui/material/Tooltip';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import VideocamIcon from '@mui/icons-material/Videocam';
+import Videocam from '@mui/icons-material/Videocam';
 import io from 'socket.io-client';
-import { auth } from './firebase';
+import { auth, signOut } from './firebase';
 import { useNavigate } from 'react-router-dom';
-import { signOut } from './firebase';
+import VideoChat from './VideoChat';
+import CameraTest from './CameraTest';
 
 const socket = io('http://localhost:5000');
 
 const Chat = () => {
   const [messages, setMessages] = useState([]);
   const [inputValue, setInputValue] = useState('');
-  const [user, setUser] = useState(null); // State to store the logged-in user
-  const [friends, setFriends] = useState(['Friend1', 'Friend2', 'Friend3']); // Example friends list
-  const [anchorEl, setAnchorEl] = useState(null); // For friend actions menu
+  const [user, setUser] = useState(null);
+  const [friends, setFriends] = useState(['Friend1', 'Friend2', 'Friend3']);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [isVideoChatOpen, setIsVideoChatOpen] = useState(false);
+  const [selectedFriend, setSelectedFriend] = useState(null);
+  const [isCameraTestOpen, setIsCameraTestOpen] = useState(false);
   const navigate = useNavigate();
 
   // Fetch the logged-in user
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        setUser(user); // Set the logged-in user
+        setUser(user);
       } else {
-        navigate('/login'); // Redirect to login if not authenticated
+        navigate('/login');
       }
     });
 
@@ -103,19 +119,31 @@ const Chat = () => {
                   <Avatar sx={{ bgcolor: '#39ff14', mr: 2 }}>{friend[0]}</Avatar>
                   <Typography color="#39ff14">{friend}</Typography>
                 </Box>
-                {/* Friend Actions Menu */}
-                <IconButton onClick={handleMenuOpen}>
-                  <MoreVertIcon sx={{ color: '#39ff14' }} />
-                </IconButton>
-                <Menu
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                >
-                  <MenuItem onClick={handleAddFriend}>Add Friend</MenuItem>
-                  <MenuItem onClick={handleKickFriend}>Kick Friend</MenuItem>
-                  <MenuItem onClick={handleBlockFriend}>Block Friend</MenuItem>
-                </Menu>
+                <Box>
+                  {/* Video Call Button */}
+                  <IconButton
+                    onClick={() => {
+                      setSelectedFriend(friend);
+                      setIsVideoChatOpen(true);
+                    }}
+                    sx={{ color: '#39ff14' }}
+                  >
+                    <VideocamIcon />
+                  </IconButton>
+                  {/* Friend Actions Menu */}
+                  <IconButton onClick={handleMenuOpen}>
+                    <MoreVertIcon sx={{ color: '#39ff14' }} />
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                  >
+                    <MenuItem onClick={handleAddFriend}>Add Friend</MenuItem>
+                    <MenuItem onClick={handleKickFriend}>Kick Friend</MenuItem>
+                    <MenuItem onClick={handleBlockFriend}>Block Friend</MenuItem>
+                  </Menu>
+                </Box>
               </ListItem>
             ))}
           </List>
@@ -129,16 +157,12 @@ const Chat = () => {
           <Typography variant="h6" fontWeight="bold" color="#39ff14">
             General Chat
           </Typography>
-
-          {/* Profile Icon and Logout Button */}
           <Box display="flex" alignItems="center">
-            {/* Profile Icon */}
             {user && (
               <Avatar sx={{ bgcolor: '#39ff14', mr: 1 }}>
-                {user.email ? user.email[0].toUpperCase() : 'U'} {/* Display the first letter of the email */}
+                {user.email ? user.email[0].toUpperCase() : 'U'}
               </Avatar>
             )}
-            {/* Logout Button with Tooltip */}
             <Tooltip title="Logout">
               <IconButton
                 onClick={handleLogout}
@@ -219,6 +243,38 @@ const Chat = () => {
           </Box>
         </Box>
       </Box>
+
+      {/* Video Chat Dialog */}
+      <VideoChat
+        open={isVideoChatOpen}
+        onClose={() => setIsVideoChatOpen(false)}
+        friend={selectedFriend}
+      />
+
+      {/* Camera Test Button and Dialog */}
+      <Button
+        variant="contained"
+        startIcon={<Videocam />}
+        onClick={() => setIsCameraTestOpen(true)}
+        sx={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '20px',
+          zIndex: 1000,
+          bgcolor: '#39ff14',
+          color: '#001f3f',
+          '&:hover': {
+            bgcolor: '#39ff14',
+            opacity: 0.8,
+          },
+        }}
+      >
+        Start Camera Test
+      </Button>
+      <CameraTest
+        open={isCameraTestOpen}
+        onClose={() => setIsCameraTestOpen(false)}
+      />
     </Box>
   );
 };

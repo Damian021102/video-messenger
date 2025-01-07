@@ -3,7 +3,9 @@ import { Dialog, DialogTitle, DialogContent, IconButton, Box } from '@mui/materi
 import { Videocam, Close } from '@mui/icons-material';
 import io from 'socket.io-client'; // Add this line
 
+
 const socket = io('http://localhost:3000'); // Add this line
+
 
 const VideoChat = () => {
   const localVideoRef = useRef(null);
